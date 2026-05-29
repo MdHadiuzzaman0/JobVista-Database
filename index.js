@@ -17,10 +17,21 @@ const client = new MongoClient(uri, {
   }
 });
 
-
 async function run() {
   try {
     await client.connect();
+    const database = client.db("JobVista");
+    const jobCollection = database.collection("jobCollection");
+
+    //get all data
+    app.get('/explore_jobs', async (req, res) => {
+        const result = await jobCollection.find().toArray()
+        res.json(result)
+    })
+
+
+
+
 
 
 
