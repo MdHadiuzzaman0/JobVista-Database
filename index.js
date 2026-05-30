@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 require('dotenv').config()
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = process.env.MONGODB_URL
 const port = process.env.PORT
 
@@ -27,6 +27,13 @@ async function run() {
     app.get('/explore_jobs', async (req, res) => {
         const result = await jobCollection.find().toArray()
         res.json(result)
+    })
+
+    //get job by id
+    app.get("/explore_jobs/:id", async (req, res) => {
+      const {id} = req.params
+      const result = await jobCollection.findOne({_id: new ObjectId(id)})
+      res.json(result)
     })
 
 
