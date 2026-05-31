@@ -22,19 +22,43 @@ async function run() {
     await client.connect();
     const database = client.db("JobVista");
     const jobCollection = database.collection("jobCollection");
+    const appliedCollection = database.collection("appliedCollection");
 
     //get all data
     app.get('/explore_jobs', async (req, res) => {
-        const result = await jobCollection.find().toArray()
-        res.json(result)
+      const result = await jobCollection.find().toArray()
+      res.json(result)
     })
 
     //get job by id
     app.get("/explore_jobs/:id", async (req, res) => {
-      const {id} = req.params
-      const result = await jobCollection.findOne({_id: new ObjectId(id)})
+      const { id } = req.params
+      const result = await jobCollection.findOne({ _id: new ObjectId(id) })
       res.json(result)
     })
+
+    //applied jobs
+    app.post("/appliedData", async (req, res) => {
+      try {
+        const appliedData = req.body;
+        const result = await appliedCollection.insertOne(appliedData)
+        res.status(200).json({ result, message: "Application saved successfully!" });
+      } catch (error) {
+        res.status(500).json({ error: "Database insertion failed" });
+      }
+    });
+
+    //get applied job
+    app.get("/appliedData/:email", async (req, res) => {
+  try {
+    const email = req.params.email;
+    // ডাটাবেজ থেকে ওই ইমেইলের সব অ্যাপ্লাইড জব খুঁজে বের করবে
+    const result = await appliedCollection.find({ email: email }).toArray();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch applied jobs" });
+  }
+});
 
 
 
