@@ -25,7 +25,7 @@ async function run() {
     const appliedCollection = database.collection("appliedCollection");
     const savedCollection = database.collection("savedCollection");
 
-    //get all data
+    //get all job
     app.get("/explore_jobs", async (req, res) => {
       const result = await jobCollection.find().toArray();
       res.json(result);
@@ -39,7 +39,7 @@ async function run() {
     });
 
     //insert applied jobs
-    app.post("/appliedData", async (req, res) => {
+    app.post("/applied_jobs", async (req, res) => {
       try {
         const appliedData = req.body;
         const result = await appliedCollection.insertOne(appliedData);
@@ -50,7 +50,7 @@ async function run() {
     });
 
     //insert saved jobs
-    app.post("/saved Data", async (req, res) => {
+    app.post("/saved_jobs", async (req, res) => {
       try {
         const savedData = req.body;
         const result = await savedCollection.insertOne(savedData);
@@ -83,19 +83,33 @@ async function run() {
     });
 
     //delete
-        app.delete("/facilities/:id", async (req, res) => {
-          const id = req.params.id
-          const result = await appliedCollection.deleteOne({ _id: new ObjectId(id) })
-          const result = await savedCollection.deleteOne({ _id: new ObjectId(id) })
-          res.json(result)
-        })
+    app.delete("/removeJob/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        // console.log(id)
+        const appliedResult = await appliedCollection.deleteOne({ _id: new ObjectId(id) });
+        res.status(200).json({
+          success: true,
+          appliedDeletedCount: appliedResult.deletedCount,
+        });
+      } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+      }
+    });
 
-    
-
-
-
-
-
+    app.delete("/removeSavedJob/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        console.log(id)
+        const savedResult = await savedCollection.deleteOne({ _id: new ObjectId(id) });
+        res.status(200).json({
+          success: true, 
+          savedDeletedCount: savedResult.deletedCount,
+        });
+      } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+      }
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log(
