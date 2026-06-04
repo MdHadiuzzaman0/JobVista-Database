@@ -24,6 +24,7 @@ async function run() {
     const jobCollection = database.collection("jobCollection");
     const appliedCollection = database.collection("appliedCollection");
     const savedCollection = database.collection("savedCollection");
+    const personalInfoCollection = database.collection("personalInfoCollection");
 
     //get all job
     app.get("/explore_jobs", async (req, res) => {
@@ -82,11 +83,10 @@ async function run() {
       }
     });
 
-    //delete
+    //delete applied data
     app.delete("/removeJob/:id", async (req, res) => {
       try {
         const id = req.params.id;
-        // console.log(id)
         const appliedResult = await appliedCollection.deleteOne({ _id: new ObjectId(id) });
         res.status(200).json({
           success: true,
@@ -97,19 +97,44 @@ async function run() {
       }
     });
 
+    //delete save data
     app.delete("/removeSavedJob/:id", async (req, res) => {
       try {
         const id = req.params.id;
-        console.log(id)
         const savedResult = await savedCollection.deleteOne({ _id: new ObjectId(id) });
         res.status(200).json({
-          success: true, 
+          success: true,
           savedDeletedCount: savedResult.deletedCount,
         });
       } catch (error) {
         res.status(500).json({ success: false, error: error.message });
       }
     });
+
+    //update personal info
+    app.put("/profile/:email", async (req, res) => {
+      try {
+        const { email } = req.params;
+        const updatedData = req.body; 
+        const result = await personalInfoCollection.updateOne({ email: email }, { $set: updatedData });
+        return res.status(200).json({
+          success: true,
+          message: "Profile updated successfully via URL param",
+        });
+
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
+      }
+    });
+
+
+
+
+
+
+
+
 
     await client.db("admin").command({ ping: 1 });
     console.log(
